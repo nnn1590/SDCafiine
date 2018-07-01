@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-#include <dynamic_libs/os_types.h>
+#include <wut_types.h>
 
-int is_gamefile(const char *path);
+int32_t is_gamefile(const char *path);
 char * getPathWithNewBase(const char * inPath, const char * newBase);
 char * getRelativePath(const char *path);
 

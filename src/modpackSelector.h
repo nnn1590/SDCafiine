@@ -4,10 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <dynamic_libs/os_types.h>
+#include <wut_types.h>
 
-void HandleMultiModPacks(u64 titleid/*,bool showMenu = true*/);
-void console_print_pos(int x, int y, const char *format, ...);
+void HandleMultiModPacks(uint64_t titleid/*,bool showMenu = true*/);
+void console_print_pos(int32_t x, int32_t y, const char *text);
 
 #ifdef __cplusplus
 }

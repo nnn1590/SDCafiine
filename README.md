@@ -1,19 +1,26 @@
-﻿# SDCafiine (HBL version)  [![Build Status](https://api.travis-ci.org/Maschell/SDCafiine.svg?branch=master)](https://travis-ci.org/Maschell/SDCafiine)
-
+﻿# SDCafiine (WUPS version)  [![Build Status](https://api.travis-ci.org/Maschell/SDCafiine.svg?branch=wups)](https://travis-ci.org/Maschell/SDCafiine)
 
 ## What is SDCafiine
-SDCafiine is a Homebrew Application for the Nintendo Wii U, that can be loaded with the [homebrew launcher](https://github.com/dimok789/homebrew_launcher). The main feature of this application is the **on-the-fly replacing of files**, which can be used used to loaded modified content from external media (**SD/USB**). It hooks into the file system functions of the WiiU. Whenever a file is accessed, SDCafiine checks if a (modified) version of it present on the SD/US device, and redirect the file operations if needed.
+SDCafiine is a Homebrew Application for the Nintendo Wii U, that can be loaded with the [Wii U Plugin Loader](https://github.com/Maschell/WiiUPluginSystem). The main feature of this application is the **on-the-fly replacing of files**, which can be used used to loaded modified content from external media (**SD/USB**). It hooks into the file system functions of the WiiU. Whenever a file is accessed, SDCafiine checks if a (modified) version of it present on the SD/US device, and redirect the file operations if needed.
+
+# Wii U Plugin System
+This is a plugin for the [Wii U Plugin System (WUPS)](https://github.com/Maschell/WiiUPluginSystem/). To be able to use this plugin you have to place the resulting `.mod` file in to the following folder:
+
+```
+sd:/wiiu/plugins
+```
+When the file is placed on the SDCard you can load it with [plugin loader](https://github.com/Maschell/WiiUPluginSystem/).
 
 # Which games are supported
 In the past SDCafiine only supported games which already had access to the SD Card (for example Super Smash Bros. for Wii U), but **since version 1.4 all games are supported**.
-To achieve this, SDCafiine has a built-in a version of [mocha](https://github.com/dimok789/mocha), which is a Custom Firmware with [libiosuhax](https://github.com/dimok789/libiosuhax) support. This allows support for FAT32 devices via [libfat](https://github.com/aliaspider/libfat) and experimental support for NTFS devices via [libntfs](https://github.com/Maschell/libntfs-wiiu).
+Now SDCafiine is a plugin for the plugin loader, this allows support for FAT32 devices via [libfat](https://github.com/aliaspider/libfat)
 
 # Features
 - On the fly file **replacing of game files**.
 - Support for **replacing files from downloadable content**
-- **Built in libiosuhax support** via mocha
-- Supports loading files from **SD and USB** (FAT32 and NTFS (highly experimental, can lead to random crashes))
+- Supports loading files from **SD and USB** (FAT32)
 - Support for **multiple modpacks** for as single game.
+
 ## How to use it
 
 ### Installation of SDCafiine
@@ -21,16 +28,17 @@ Like many other homebrew applications for the Wii U, it can't be installed. The 
 
 Example path of the elf on the SD:
 ```
-SD:/wiiu/apps/sdcafiine/sdcafiine.elf
+SD:/wiiu/plugins/sdcafiine.mod
 ```
 
 ### Starting SDCafiine
 
-When the files are on the SDCard, use your prefered method to get into the [homebrew launcher](https://github.com/dimok789/homebrew_launcher) and start SDCafiine. **No** starting of any CFW is required before you can use SDCafiine, it has a built in fork of mocha.
+When the files are on the SDCard, use the [plugin loader](https://github.com/Maschell/WiiUPluginSystem/) to load the sdcafiine plugin.
+
 On success, the system menu should load. Now simply start any game and the mods should load.
 
 ### Installation of the mods
-Before the mods can be loaded, they need to be copied to a SD or USB device. Since version 1.4 also USB devices (FAT32 and NTFS only) are supported via libfat/libntfs.
+Before the mods can be loaded, they need to be copied to a SD or USB device. Since version 1.4 also USB devices (FAT32 only) are supported via libfat/libntfs.
 **In the following "root:/" is corresponding to the root of your SD/USB device**. The basic filepath structure is this:
 
 ```
@@ -69,16 +77,11 @@ Make sure you download the complete repo, including the submodules:
 - git submodule update --init --recursive
 
 For building you need: 
-- [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
-- [libfat](https://github.com/aliaspider/libfat/)
-- [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
-- [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
-- [libutils](https://github.com/Maschell/libutils) for common functions.
-- [libfswrapper](https://github.com/Maschell/fs_wrapper) to replace the fs functions.
+- [wut](https://github.com/decaf-emu/wut)
+- [libutilswut](https://github.com/Maschell/libutils/tree/wut) (wut branch) for common functions.
+- [libfswrapper](https://github.com/Maschell/fs_wrapper/tree/wut) (wut branch) to replace the fs functions.
 
 Install them (in this order) according to their README's. Don't forget the dependencies of the libs itself.
-
-*note: when you change something in the mocha folder, you need to use make clean before building.*
 
 ## Credits
 HBL support, code rewrite and further improvements - Maschell  

@@ -8,13 +8,12 @@ env:
   global:
     - DEVKITPRO=/opt/devkitpro    
     - DEVKITPPC=/opt/devkitpro/devkitPPC
-    - DEVKITARM=/opt/devkitpro/devkitARM
+    - WUT_ROOT=/opt/devkitpro/wut
     - PORTLIBREPOS=$HOME/portlibrepos
 
 cache:
   directories:
     - "$HOME/.local"
-    - "$PORTLIBREPOS"
     - "$DEVKITPRO"
 
 addons:
@@ -28,22 +27,33 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -O /tmp/devkitpro-pacman.deb; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i /tmp/devkitpro-pacman.deb; fi
   - yes | sudo dkp-pacman -Syu devkitPPC --needed
-  - yes | sudo dkp-pacman -Syu devkitARM --needed
+  - yes | sudo dkp-pacman -Syu general-tools --needed
+  - wget $(curl -s https://api.github.com/repos/decaf-emu/wut/releases/latest | grep 'browser_' | grep 'linux' | cut -d\" -f4)
 
 install:
+  - 7z x -y $(ls | grep "linux") -o${WUT_ROOT}
+  - cd $PORTLIBREPOS
+  - git clone https://github.com/Maschell/WiiUPluginSystem.git
+  - git clone https://github.com/Maschell/libutils.git -b wut
+  - git clone https://github.com/Maschell/fs_wrapper.git -b wut
   - cd $PORTLIBREPOS  
-  - ((git clone https://github.com/Maschell/dynamic_libs.git -b lib && (7z x -y ./dynamic_libs/libs/portlibs.zip -o${DEVKITPRO})) || (cd dynamic_libs && git pull))
-  - (git clone https://github.com/dimok789/libiosuhax.git || (cd libiosuhax && git pull))
-  - (git clone https://github.com/Maschell/libfat.git || (cd libfat && git pull))   
-  - (git clone https://github.com/Maschell/libntfs-wiiu.git || (cd libntfs-wiiu && git pull))   
-  - (git clone https://github.com/Maschell/libutils.git || (cd libutils && git pull))   
-  - (git clone https://github.com/Maschell/fs_wrapper.git || (cd fs_wrapper && git pull))
-  - (cd dynamic_libs && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
-  - (cd libiosuhax && make -j8 && make install) 
-  - (cd libfat && make wiiu-release && make wiiu-install)
-  - (cd libntfs-wiiu && make wiiu-install)
-  - (cd libutils && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
-  - (cd fs_wrapper && ((make -j8 | grep -c "built ... ") && make install && echo "installed" ) || (echo "no need for make install" && make))
+  - cd WiiUPluginSystem
+  - make && make install
+  - cd $PORTLIBREPOS  
+  - cd libutils
+  - mkdir build && cd build
+  - cmake -DCMAKE_TOOLCHAIN_FILE=$WUT_ROOT/share/wut.toolchain.cmake -DCMAKE_INSTALL_PREFIX=$WUT_ROOT ../
+  - make install
+  - cd $PORTLIBREPOS
+  - cd controller_patcher
+  - mkdir build && cd build
+  - cmake -DCMAKE_TOOLCHAIN_FILE=$WUT_ROOT/share/wut.toolchain.cmake -DCMAKE_INSTALL_PREFIX=$WUT_ROOT ../
+  - make install
+  - cd $PORTLIBREPOS
+  - cd fs_wrapper
+  - mkdir build && cd build
+  - cmake -DCMAKE_TOOLCHAIN_FILE=$WUT_ROOT/share/wut.toolchain.cmake -DCMAKE_INSTALL_PREFIX=$WUT_ROOT ../
+  - make install
 
 before_script:
   - cd $TRAVIS_BUILD_DIR/
@@ -52,19 +62,18 @@ script:
 - make
 
 before_deploy:
-- mkdir -p "wiiu/apps/sdcafiine"
+- mkdir -p "wiiu/plugins"
 - commit="$(git rev-parse --short=7 HEAD)"
 - chmod +x gitrev.sh
 - versiontag="$(./gitrev.sh)"
 - make
-- cp meta/* wiiu/apps/sdcafiine
-- cp sdcafiine.elf wiiu/apps/sdcafiine
-- zip -r sdcafiine_$versiontag.zip wiiu
+- cp sdcafiine.mod wiiu/plugins/
+- zip -r sdcafiine_wups_$versiontag.zip wiiu
 - git config --global user.email "builds@travis-ci.com"
 - git config --global user.name "Travis CI"
-- export GIT_TAG=SDCafiine-$versiontag
+- export GIT_TAG=SDCafiine-WUPS-$versiontag
 - commitLog="$(git log -1 --pretty=%B)"
-- commitMessage="$(echo -e "-\n" && echo "SDCafiine nightly build. Not a stable release. Expect bugs!" && echo -e "\nCommitlog:\n")"
+- commitMessage="$(echo -e "-\n" && echo "SDCafiine WUPS nightly build. Not a stable release. Expect bugs!" && echo -e "\nCommitlog:\n")"
 - git tag $GIT_TAG -a -m "$commitMessage" -m "$commitLog"
 - git push --quiet https://$GITHUBKEY@github.com/Maschell/SDCafiine $GIT_TAG > /dev/null 2>&1
 
@@ -74,7 +83,7 @@ deploy:
   prerelease: true
   api_key:
     secure: "if6/uEF7XcfbNk/32Jtbr/FPObciLUPCm9mmw3Ca7RAYKsqEHr1tWM46zaMQMCJNb6W2AXtNx8rllqre8LVpPQLVCgwG+6k0y5DzLPHc+ya1tuj2sPBBvA34OTwPc+ujozhOIWjpu4vS9W+6x5NEvtRgF2jEdST2/jU4nvv4wsNlaBQiAikSh2Vfgxtu9CxeHf/1aXFhfbhoT9at2p070zoYMIbVU+3ystukREs4EixVjTQQcBRSmwNb0HJ4hBtjTR+66T/nZ6jbdWLhhu70cnnjMXs3tC7Dbrrnwy3X0Rsg7m3BMJxqmt/jIiaA0MwEd/86gNrf0H60whTgrIIKWyucrLblB0gm6WV6W5/Guh0pZ3+lPBtbLP5zWUeZFkdgex0fnGH3qdPfyq+DLih+JJgroGTsXTBQ2I0CSd6DWs+hDAF1pebqbBa/KxBBYR3gTEbd8eUFlhol1jILtffYSl8SgCF4Nvsy6hVdaW4yXw/aZAgiYzM0O7VJUiWm3hujvLBHIaZiT1xcJ+Cq280bgyna8AByuRE4Pfewfo1xUlTMDMUVmFOHsUmo1IR/5EXRji3kAVfyyfB5viurxujBCBWXYodquGJ2hExtLurVq7OaJ/RReXzHUORUEgdUFXIYtXKezZ7wfYHf0Ah55Rk1saBQcBHknnrqE8mSEsgOuiw="
-  file: sdcafiine_$versiontag.zip
+  file: sdcafiine_wups_$versiontag.zip
   on:
     repo: Maschell/SDCafiine
     tags: false

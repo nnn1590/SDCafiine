@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#include <dynamic_libs/os_defs.h>
-
 #define CAFE_OS_SD_PATH             "/vol/external01"
 #define GAME_MOD_FOLDER             "/sdcafiine"
 #define SD_PATH                     "sd:"
@@ -40,16 +38,6 @@ extern "C" {
 #define FILELIST_NAME               "filelist.txt"
 #define DIR_IDENTIFY                "?"  /* maximum length = 1*/
 #define PARENT_DIR_IDENTIFY         "?.."
-
-#define ELF_DATA_ADDR               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x00))
-#define ELF_DATA_SIZE               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x04))
-#define MAIN_ENTRY_ADDR             (*(volatile unsigned int*)(MEM_BASE + 0x1400 + 0x00))
-
-#ifndef EXIT_SUCCESS
-#define EXIT_SUCCESS                0
-#endif
-#define EXIT_HBL_EXIT               0xFFFFFFFE
-#define EXIT_RELAUNCH_ON_LOAD       0xFFFFFFFD
 
 #ifdef __cplusplus
 }

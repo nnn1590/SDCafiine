@@ -10,7 +10,7 @@
 #include "common/common.h"
 #include "common/retain_vars.h"
 
-int is_gamefile(const char *path) {
+int32_t is_gamefile(const char *path) {
     if(path == NULL) return 0;
     if(strncmp(path,"CAFE/",5) == 0) return GAME_PATH_TYPE_STRIPPED_CONTENT;    //Workaround for NSMBU
 
@@ -19,14 +19,14 @@ int is_gamefile(const char *path) {
         path = &path[1];
 
     // In case the path does not start with "/" (some games do that too ...)
-    int len = 0;
+    int32_t len = 0;
     char new_path[16];
     if(path[0] != '/') {
         new_path[0] = '/';
         len++;
     }
 
-    while(*path && len < (int)(sizeof(new_path) - 1)) {
+    while(*path && len < (int32_t)(sizeof(new_path) - 1)) {
         new_path[len++] = *path++;
     }
     new_path[len++] = 0;
@@ -45,7 +45,7 @@ char * getPathWithNewBase(const char * inPath, const char * newBase){
     if(relativePath == NULL){
         /*
         if(strlen(gModFolder) > 0){
-            int file = 0;
+            int32_t file = 0;
             if(endsWith(inPath,BOOT_TV_TEX_TGA,-1,-1)){ file = 1;}
             else if(endsWith(inPath,BOOT_DRC_TEX_TGA,-1,-1)){ file = 2;}
             else if(endsWith(inPath,BOOT_SOUND_BTSND,-1,-1)){ file = 3;}
@@ -83,10 +83,10 @@ char * getRelativePath(const char *path){
     if(path == NULL) return NULL;
     char * pathForCheck = NULL;
 
-    int gameFile = is_gamefile(path);
+    int32_t gameFile = is_gamefile(path);
     if(gameFile > 0) {
         //if(DEBUG_LOG) log_printf("getNewPath %s\n", path);
-        int path_offset = 0;
+        int32_t path_offset = 0;
 
         // In case the path starts by "//" and not "/" (some games do that ... ...)
         if (path[0] == '/' && path[1] == '/')
@@ -116,7 +116,7 @@ char * getRelativePath(const char *path){
             sprintf(pathForCheck,"%s/%s",CONTENT_FOLDER,pathForCheckInternal);
         } else if (gameFile == GAME_PATH_TYPE_AOC) { // is aoc
             //aoc
-            int aocFolderLength = 1;
+            int32_t aocFolderLength = 1;
             char * aocFolderLengthCheck = (char*)path + 5 + path_offset;
             while (aocFolderLengthCheck[0] != '/') {
                 aocFolderLength++;
