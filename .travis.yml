@@ -18,7 +18,7 @@ before_deploy:
 - commit="$(git rev-parse --short=7 HEAD)"
 - chmod +x gitrev.sh
 - versiontag="$(./gitrev.sh)"
-- make
+- docker run -it --rm -v ${PWD}:/project sdcafiinewups-builder make
 - cp sdcafiine.mod wiiu/plugins/
 - zip -r sdcafiine_wups_$versiontag.zip wiiu
 - git config --global user.email "builds@travis-ci.com"
