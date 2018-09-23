@@ -1,60 +1,17 @@
-language: cpp
-
-os: linux
-sudo: false
-dist: trusty
-
-env:
-  global:
-    - DEVKITPRO=/opt/devkitpro    
-    - DEVKITPPC=/opt/devkitpro/devkitPPC
-    - WUT_ROOT=/opt/devkitpro/wut
-    - PORTLIBREPOS=$HOME/portlibrepos
-
-cache:
-  directories:
-    - "$HOME/.local"
-    - "$DEVKITPRO"
-
+sudo: required
+branches:
+  only:
+   - wups
+services:
+- docker
 addons:
   apt:
     packages:
     - p7zip-full
-
-before_install:
-  - mkdir -p "${PORTLIBREPOS}"
-  - mkdir -p "${DEVKITPRO}"
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb -O /tmp/devkitpro-pacman.deb; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i /tmp/devkitpro-pacman.deb; fi
-  - yes | sudo dkp-pacman -Syu devkitPPC --needed
-  - yes | sudo dkp-pacman -Syu general-tools --needed
-  - wget $(curl -s https://api.github.com/repos/decaf-emu/wut/releases/latest | grep 'browser_' | grep 'linux' | cut -d\" -f4)
-
-install:
-  - 7z x -y $(ls | grep "linux") -o${WUT_ROOT}
-  - cd $PORTLIBREPOS
-  - git clone https://github.com/Maschell/WiiUPluginSystem.git
-  - git clone https://github.com/Maschell/libutils.git -b wut
-  - git clone https://github.com/Maschell/fs_wrapper.git -b wut
-  - cd $PORTLIBREPOS  
-  - cd WiiUPluginSystem
-  - make && make install
-  - cd $PORTLIBREPOS  
-  - cd libutils
-  - mkdir build && cd build
-  - cmake -DCMAKE_TOOLCHAIN_FILE=$WUT_ROOT/share/wut.toolchain.cmake -DCMAKE_INSTALL_PREFIX=$WUT_ROOT ../
-  - make install
-  - cd $PORTLIBREPOS
-  - cd fs_wrapper
-  - mkdir build && cd build
-  - cmake -DCMAKE_TOOLCHAIN_FILE=$WUT_ROOT/share/wut.toolchain.cmake -DCMAKE_INSTALL_PREFIX=$WUT_ROOT ../
-  - make install
-
 before_script:
-  - cd $TRAVIS_BUILD_DIR/
-  
+- docker build . -t sdcafiinewups-builder
 script:
-- make
+- docker run -it --rm -v ${PWD}:/project sdcafiinewups-builder make
 
 before_deploy:
 - mkdir -p "wiiu/plugins"
